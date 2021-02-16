@@ -32,7 +32,7 @@ ui <- fluidPage(
     shinyjs::useShinyjs(),
     # Application title
     titlePanel("/home/common Data Science Movie Series"),
-    h3("Next Movie: February 2021, date TBD - 7 pm Central Time"),
+    h3("Next Movie: February 20, 2021 - 7 pm Central Time"),
     h4("Check #movie-night to get more info."),
     
 
@@ -175,8 +175,9 @@ server <- function(input, output, session) {
       HTML(paste("<h2>Tutorial</h2>",
                 "Each round, the least popular movie is dropped. 
                 The following round, the ballots whose votes were dropped will contribute their next-highest choice." ,
-                "To win outright, a movie must accumulate at least 50% of the total votes.",
+                "To win outright, a movie must accumulate at least 50%+1 of the total votes.",
                 "If there is an equal tie in Round 4 between 2 or more films, the entire pool of votes for the ones tied is the tie-breaker.",
+                "Current ballots cast:",mv$denominator, "Votes required for win (before fourth round):", mv$required_to_win+1,
                 "<h2>Round 1</h2>", str1,
                  paste("Dropped in R1:", str1b),
                  "<h2>Round 2</h2>", str2,

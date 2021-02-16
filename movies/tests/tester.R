@@ -10,8 +10,7 @@ local_savepath = './tests'
 remote_responsepath = './remote_responses/'
 source("movie_select_class.R")
 
-test_that("Returned objects sized correctly",
-          {
+test_that("Returned objects sized correctly",{
             local_responsepath = './tests/remote_responses_t1/'
             mv = MovieSelection$new(ssh_session = ssh_sesh, path = local_responsepath)
             orig = mv$pull_responses()
@@ -220,6 +219,29 @@ test_that("T8: Five votes, zero dupes, unsolvable: correctly handled",
 test_that("T9: NA values omitted",
           {
             local_responsepath = './tests/remote_responses_t9/'
+            mv = MovieSelection$new(ssh_session = ssh_sesh, path = local_responsepath)
+            orig = mv$pull_responses()
+            cleandf = mv$get_original_data()
+            allresults= mv$calculate_rounds()
+            complete=mv$result_completion()
+            tie = mv$tie_catcher()
+            
+            expect_equal(length(orig), 6)
+            expect_equal(nrow(allresults$firstrd$votes), 5)
+            expect_equal(nrow(allresults$secondrd$votes), 5)
+            expect_equal(nrow(allresults$thirdrd$votes), 4)
+            expect_equal(nrow(allresults$fourthrd$votes), 4)
+            
+            expect_equal(nrow(cleandf$data),5)
+            
+            expect_equal(complete[[1]], "No conclusive solution yet.")
+            expect_equal(tie[[4]], "Total Tie")
+          })
+
+
+test_that("T10: Correct winner found after insufficient majority in first round",
+          {
+            local_responsepath = './tests/remote_responses_t10/'
             mv = MovieSelection$new(ssh_session = ssh_sesh, path = local_responsepath)
             orig = mv$pull_responses()
             cleandf = mv$get_original_data()

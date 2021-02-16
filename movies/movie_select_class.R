@@ -8,6 +8,7 @@ MovieSelection <- R6Class("MovieSelection",
                     df = NULL,
                     cleandf = NULL,
                     denominator = NULL,
+                    required_to_win = NULL,
                     last_round = NULL,
                     initialize = function(ssh_session, path) {
                       self$path = path
@@ -17,6 +18,7 @@ MovieSelection <- R6Class("MovieSelection",
                       self$df = startdata
                       self$cleandf = self$get_original_data()$data
                       self$denominator = self$get_original_data()$total_firsts
+                      self$required_to_win = floor(self$denominator/2)
                       
                     },
                     pull_responses = function(){
@@ -142,7 +144,7 @@ MovieSelection <- R6Class("MovieSelection",
                           result = "Total Tie"
                         }
                         
-                        else if((nrow(item$votes) - nrow(item$losers)) == 1){
+                        else if((nrow(item$votes) - nrow(item$losers)) == 1 & (max(item$votes$Votes) >= (self$required_to_win+1)){
                           result = "Winner"
                         }
                         
@@ -170,7 +172,7 @@ MovieSelection <- R6Class("MovieSelection",
                           if(ties[i] %in% c('Winner', "Win by Majority in Fourth Round")){
                               votes = allrounds[[i]][1]
                               winner = votes$votes[votes$votes$Votes == max(votes$votes$Votes, na.rm=T),]
-                              winner = winner[winner$Votes >= floor((self$denominator)/2),]
+                              winner = winner[winner$Votes >= self$required_to_win,]
                               
                               if(!exists('output')){
                                 output = paste("Winner in Round", i, "is", winner$Movie)
