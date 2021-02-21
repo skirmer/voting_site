@@ -21,6 +21,9 @@ MovieSelection <- R6Class(
             self$cleandf = self$get_original_data()$data
             self$denominator = self$get_original_data()$total_firsts
             self$required_to_win = floor(self$denominator/2)
+            # if(self$denominator < 1){
+            #   self$required_to_win 
+            # }
         },
         pull_responses = function(){
         # Download data from server
@@ -66,9 +69,17 @@ MovieSelection <- R6Class(
                   filter(Movie != "NA") %>%
                   summarize(Votes = n(), .groups = "drop") 
             }
+
+            if(nrow(vround) == 1){
+              losers = data.frame("Movie" = "No Losers", "Votes" = 0)
+            } else if( !exists("vround")){
+              losers = NULL
+            } else {
+              losers = vround[vround$Votes == min(vround$Votes, na.rm=T),]
+              colnames(losers) = c("Movie", "Votes")
               
-            losers = vround[vround$Votes == min(vround$Votes, na.rm=T),]
-            colnames(losers) = c("Movie", "Votes")
+            }
+
             return(list(
               "votes" = vround, 
               'losers' = losers)
@@ -148,11 +159,16 @@ MovieSelection <- R6Class(
             for(i in 1:length(allresults)){
                 item = allresults[[i]]
                 if((nrow(item$votes) - nrow(item$losers)) == 0){
+                  
+                  if(!exists("item$losers")){
                     result = "Total Tie"
+                  } else if(item$losers$Movie == "No Losers"){
+                    result = "Winner"
+                  }
                 }
                 
                 else if((nrow(item$votes) - nrow(item$losers)) == 1 & 
-                        (max(item$votes$Votes) >= (self$required_to_win+1))){
+                        (max(item$votes$Votes) >= (self$required_to_win))){
                     result = "Winner"
                 }
                 
@@ -183,6 +199,9 @@ MovieSelection <- R6Class(
                       output = paste("Winner in Round", i, "is", winner$Movie)
                       self$last_round = i
                     }
+                }
+                if(is.null(self$last_round)){
+                  self$last_round = 4
                 }
             }
             if(!exists('output')){

@@ -24,9 +24,8 @@ fields <- c("name", "title", "newtitle", "date")
 history <- read.csv("history.csv")
 colnames(history) <- c("Movie", "Date Watched")
 movielist <- c("Airplane!", "Back to the Future", "Close Encounters of the Third Kind",
-               "Clueless", "Escape from New York", "Fargo", "My Cousin Vinny", 
-               "Pineapple Express", "The Social Network", "The Royal Tenenbaums",
-               "Total Recall", "The DaVinci Code")
+               "Clueless", "The DaVinci Code", "Escape from New York", "Fargo", "My Cousin Vinny", 
+               "Pineapple Express", "Robocop", "The Social Network", "Total Recall", "The Town")
 df = pullResponses(ssh_sesh)
 
 ui <- fluidPage(
@@ -35,7 +34,7 @@ ui <- fluidPage(
     # Title/head
     titlePanel("/home/common Data Science Movie Series"),
     # Update the schedule of movies after each
-    h3("Next Movie: February 20, 2021 - 7 pm Central Time"),
+    h3("Next Movie: March 2021, TBD - 7 pm Central Time"),
     h4("Check #movie-night to get more info."),
 
     sidebarLayout(

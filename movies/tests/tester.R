@@ -115,6 +115,7 @@ test_that("T2: Two Way Tie correctly broken",
 
 test_that("T3: Single vote correctly handled",
           {
+            # Right now, one vote can't win by itself... deciding if I want to change that. 
             local_responsepath = './tests/remote_responses_t3/'
             mv = MovieSelection$new(ssh_session = ssh_sesh, path = local_responsepath)
             orig = mv$pull_responses()
@@ -126,8 +127,8 @@ test_that("T3: Single vote correctly handled",
             expect_equal(length(orig), 2)            
             expect_equal(nrow(cleandf$data), 1)
             
-            expect_equal(complete[[1]], "No conclusive solution yet.")
-            expect_equal(tie[[4]], "Total Tie")
+            expect_equal(complete[[1]], "Winner in Round 1 is War Games")
+            expect_equal(tie[[1]], "Winner")
           })
 
 test_that("T4: Two votes correctly handled",
