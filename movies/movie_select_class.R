@@ -44,7 +44,9 @@ MovieSelection <- R6Class(
                          rank2 = stringr::str_trim(rank2),
                          rank3 = stringr::str_trim(rank3),
                          rank4 = stringr::str_trim(rank4)) %>%
-                  unique()
+                  unique() %>%
+                filter(!is.na(rank1))
+              
               total_firsts = nrow(data)
               
               return(list(

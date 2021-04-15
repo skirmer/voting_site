@@ -1,7 +1,12 @@
-.csv
+*.yml
+*.csv
 .gif
 .dcf
 ssh_maint.R
+movies/tests/remote_responses*/
+movies/www/
+movies/old_responses/
+movies/rsconnect/
 
 # History files
 .Rhistory

@@ -10,6 +10,8 @@ local_savepath = './tests'
 remote_responsepath = './remote_responses/'
 source("movie_select_class.R")
 
+
+
 test_that("Returned objects sized correctly",{
             local_responsepath = './tests/remote_responses_t1/'
             mv = MovieSelection$new(ssh_session = ssh_sesh, path = local_responsepath)
@@ -260,4 +262,27 @@ test_that("T10: Correct winner found after insufficient majority in first round"
             
             expect_equal(complete[[1]], "No conclusive solution yet.")
             expect_equal(tie[[4]], "Total Tie")
+          })
+
+
+test_that("T11: Correct winner found when there are lots of ballots that are blank/only suggesting",
+          {
+            local_responsepath = './tests/many_suggest/'
+            mv = MovieSelection$new(ssh_session = ssh_sesh, path = local_responsepath)
+            orig = mv$pull_responses()
+            cleandf = mv$get_original_data()
+            allresults= mv$calculate_rounds()
+            complete=mv$result_completion()
+            tie = mv$tie_catcher()
+            
+            expect_equal(length(orig), 10)
+            expect_equal(nrow(cleandf$data), 5)
+            expect_equal(cleandf$total_firsts, 5)
+            expect_equal(floor(cleandf$total_firsts/2),2)
+            expect_equal(floor(cleandf$total_firsts/2)+1,3)
+            
+
+            expect_equal(complete[[1]], "Winner in Round 1 is Airplane!")
+            expect_equal(tie[[1]], "Winner")
+            expect_equal(tie[[4]], "Winner")
           })
