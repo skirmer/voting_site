@@ -38,7 +38,7 @@ ui <- fluidPage(
     # Title/head
     titlePanel("/home/common Data Science Movie Series"),
     # Update the schedule of movies after each
-    h3("Next Movie: May 2021 TBD - 7 pm Central Time"),
+    h3("Next Movie: May 22, 2021 - 7 pm Central Time"),
     h4("Check #movie-night to get more info."),
 
     sidebarLayout(
@@ -213,7 +213,8 @@ server <- function(input, output, session) {
             more films, the entire pool of votes for the ones
             tied is the tie-breaker.",
             "Current ballots cast:", mv$denominator, 
-            "Votes required for win (before fourth round):", mv$required_to_win+1,
+            "Votes required for win (before fourth round):", mv$required_to_win,
+            "Votes required for win (in fourth round):", mv$required_to_win4,
             "<h2>Round 1</h2>", str1,
              paste("Dropped in R1:", str1b),
              "<h2>Round 2</h2>", str2,

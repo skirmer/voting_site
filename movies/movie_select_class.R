@@ -10,6 +10,7 @@ MovieSelection <- R6Class(
         cleandf = NULL,
         denominator = NULL,
         required_to_win = NULL,
+        required_to_win4 = NULL,
         last_round = NULL,
         
         initialize = function(ssh_session, path) {
@@ -20,7 +21,8 @@ MovieSelection <- R6Class(
             self$df = startdata
             self$cleandf = self$get_original_data()$data
             self$denominator = self$get_original_data()$total_firsts
-            self$required_to_win = floor(self$denominator/2)
+            self$required_to_win4 = floor(self$denominator/2)
+            self$required_to_win = ceiling(self$denominator/2)
             # if(self$denominator < 1){
             #   self$required_to_win 
             # }
@@ -113,10 +115,12 @@ MovieSelection <- R6Class(
                 losers=firstrd$losers
             )
             
-            losers_r2 = rbind(firstrd$losers, secondrd$losers)
-            winners2 = round2_votes[!(round2_votes$Movie %in% losers_r2$Movie), ]
-            losers2 = self$cleandf[self$cleandf$rank1 %in% losers_r2$Movie &
-                                      self$cleandf$rank2 %in% losers_r2$Movie, 
+#            losers_r2 = rbind(firstrd$losers, secondrd$losers)
+            losers_r2 = secondrd$losers
+            
+            winners2 = round2_votes[!(round2_votes$Movie %in% secondrd$losers$Movie), ]
+            losers2 = self$cleandf[self$cleandf$rank1 %in% firstrd$losers$Movie &
+                                      self$cleandf$rank2 %in% secondrd$losers$Movie, 
                                    c('name', 'rank3')]
             colnames(losers2) = c("name", "Movie")
             round3_votes = rbind(winners2, losers2)
@@ -129,11 +133,12 @@ MovieSelection <- R6Class(
                 losers = losers_r2
             )
             
-            losers_r3 = rbind(losers_r2, thirdrd$losers)
-            winners3 = round3_votes[!(round3_votes$Movie %in% losers_r3$Movie), ]
-            losers3 = self$cleandf[self$cleandf$rank1 %in% losers_r3$Movie &
-                                     self$cleandf$rank2 %in% losers_r3$Movie &
-                                     self$cleandf$rank3 %in% losers_r3$Movie,
+            #losers_r3 = rbind(losers_r2, thirdrd$losers)
+            losers_r3 =  thirdrd$losers
+            winners3 = round3_votes[!(round3_votes$Movie %in% thirdrd$losers$Movie), ]
+            losers3 = self$cleandf[self$cleandf$rank1 %in% firstrd$losers$Movie &
+                                     self$cleandf$rank2 %in% secondrd$losers$Movie &
+                                     self$cleandf$rank3 %in% thirdrd$losers$Movie,
                                    c('name', 'rank4')]
             
             colnames(losers3) = c("name", "Movie")
@@ -174,13 +179,18 @@ MovieSelection <- R6Class(
                     result = "Winner"
                 }
                 
+                else if((nrow(item$votes) - nrow(item$losers)) == 1 & i == 4 &
+                        (max(item$votes$Votes) >= (self$required_to_win4))){
+                  result = "Win by Majority in Fourth Round"
+                }
+                
                 else if((nrow(item$votes) - nrow(item$losers)) == 2){
                     result = "Two Way Tie"
                     max_hit = item$votes[item$votes$Votes == max(item$votes$Votes, na.rm=T),]
                     if(i == 4 & nrow(max_hit == 1)){
-                        result = "Win by Majority in Fourth Round"
+                        result = "Two Way Tie: Win by Majority in Fourth Round"
                     }
-                }
+                } 
                 
                 else {result = "Multi Way Tie"}
                 tieresults = append(tieresults, result)
@@ -192,16 +202,26 @@ MovieSelection <- R6Class(
             allrounds = self$calculate_rounds()
             ties = self$tie_catcher()
             for(i in 1:length(allrounds)){
-                if(ties[i] %in% c('Winner', "Win by Majority in Fourth Round")){
+                if(ties[i] %in% c('Winner')){
                     votes = allrounds[[i]][1]
                     winner = votes$votes[votes$votes$Votes == max(votes$votes$Votes, na.rm=T),]
-                    winner = winner[winner$Votes >= self$required_to_win,]
+                    winner = winner[winner$Votes >= (self$required_to_win),]
                     
                     if(!exists('output')){
                       output = paste("Winner in Round", i, "is", winner$Movie)
                       self$last_round = i
                     }
                 }
+              if(ties[i] %in% c("Win by Majority in Fourth Round", "Two Way Tie: Win by Majority in Fourth Round")){
+                votes = allrounds[[i]][1]
+                winner = votes$votes[votes$votes$Votes == max(votes$votes$Votes, na.rm=T),]
+                winner = winner[winner$Votes >= (self$required_to_win4),]
+                
+                if(!exists('output')){
+                  output = paste("Winner in Round", i, "is", winner$Movie)
+                  self$last_round = i
+                }
+              }
                 if(is.null(self$last_round)){
                   self$last_round = 4
                 }
@@ -222,9 +242,11 @@ MovieSelection <- R6Class(
                     tallies = append(tallies, t1)
                   }
                   winner = options[which.max(tallies)]
-                  output = paste0("Tie in Round ", 4, " between ", 
-                                 paste(options, sep=" and ", collapse=" and "),
-                                 ". Tie break results in win for ", winner)
+                  if(length(options) > 1){
+                    output = paste0("Tie in Round ", 4, " between ", 
+                                   paste(options, sep=" and ", collapse=" and "),
+                                   ". Tie break results in win for ", winner)
+                  }
                 }
               }
               if(!exists('output')){

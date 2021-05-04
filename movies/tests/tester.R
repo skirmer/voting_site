@@ -112,7 +112,7 @@ test_that("T2: Two Way Tie correctly broken",
             expect_equal(nrow(cleandf$data), 6)
             
             expect_equal(complete[[1]], "Winner in Round 4 is My Cousin Vinny")
-            expect_equal(tie[[4]], "Win by Majority in Fourth Round")
+            expect_equal(tie[[4]], "Two Way Tie: Win by Majority in Fourth Round")
           })
 
 test_that("T3: Single vote correctly handled",
@@ -129,8 +129,8 @@ test_that("T3: Single vote correctly handled",
             expect_equal(length(orig), 2)            
             expect_equal(nrow(cleandf$data), 1)
             
-            expect_equal(complete[[1]], "Winner in Round 1 is War Games")
-            expect_equal(tie[[1]], "Winner")
+            expect_equal(complete[[1]], "No conclusive solution yet.")
+            expect_equal(tie[[1]], "Total Tie")
           })
 
 test_that("T4: Two votes correctly handled",
@@ -252,16 +252,16 @@ test_that("T10: Correct winner found after insufficient majority in first round"
             complete=mv$result_completion()
             tie = mv$tie_catcher()
             
-            expect_equal(length(orig), 6)
+            expect_equal(length(orig),7)
             expect_equal(nrow(allresults$firstrd$votes), 5)
-            expect_equal(nrow(allresults$secondrd$votes), 5)
-            expect_equal(nrow(allresults$thirdrd$votes), 4)
-            expect_equal(nrow(allresults$fourthrd$votes), 4)
+            expect_equal(nrow(allresults$secondrd$votes), 3)
+            expect_equal(nrow(allresults$thirdrd$votes), 3)
+            expect_equal(nrow(allresults$fourthrd$votes), 3)
             
-            expect_equal(nrow(cleandf$data),5)
+            expect_equal(nrow(cleandf$data),6)
             
-            expect_equal(complete[[1]], "No conclusive solution yet.")
-            expect_equal(tie[[4]], "Total Tie")
+            expect_equal(complete[[1]], "Winner in Round 4 is The Royal Tenenbaums")
+            expect_equal(tie[[4]], "Two Way Tie: Win by Majority in Fourth Round")
           })
 
 
@@ -286,3 +286,29 @@ test_that("T11: Correct winner found when there are lots of ballots that are bla
             expect_equal(tie[[1]], "Winner")
             expect_equal(tie[[4]], "Winner")
           })
+
+
+test_that("T12: unexpected drop in r3",
+          {
+            local_responsepath = './tests/r3_floor/'
+            mv = MovieSelection$new(ssh_session = ssh_sesh, path = local_responsepath)
+            orig = mv$pull_responses()
+            cleandf = mv$get_original_data()
+            allresults= mv$calculate_rounds()
+            complete=mv$result_completion()
+            tie = mv$tie_catcher()
+            
+            expect_equal(length(orig), 6)
+            expect_equal(nrow(cleandf$data), 5)
+            expect_equal(cleandf$total_firsts, 5)
+            expect_equal(floor(cleandf$total_firsts/2),2)
+            expect_equal(floor(cleandf$total_firsts/2)+1,3)
+            
+            
+            expect_equal(complete[[1]], "Winner in Round 4 is Four Lions")
+            expect_equal(tie[[1]], "Total Tie")
+            expect_equal(tie[[4]], "Win by Majority in Fourth Round")
+          })
+
+
+
