@@ -254,6 +254,41 @@ MovieSelection <- R6Class(
               }
            return(list(output, self$last_round))
         },
+        r4_tiebreak = function(){
+          cleandf = self$get_original_data()
+          conclusion = self$result_completion()
+          
+          r1=cleandf$data %>%
+              group_by("Movie" = rank1) %>%
+              summarize(Votes = n(), .groups = "drop") 
+            
+          r2=cleandf$data %>%
+            group_by("Movie" = rank2) %>%
+            summarize(Votes = n(), .groups = "drop") 
+          
+          r3=cleandf$data %>%
+            group_by("Movie" = rank3) %>%
+            summarize(Votes = n(), .groups = "drop") 
+          
+          r4=cleandf$data %>%
+            group_by("Movie" = rank4) %>%
+            summarize(Votes = n(), .groups = "drop") 
+          
+          sums = "Not required"
+          
+          if (conclusion[[2]] == 4 & 
+              conclusion[[1]] == 'No conclusive solution yet.' &
+              sum(r1$Votes) > 1){
+            
+            sums = rbind(r1, r2, r3, r4) %>% 
+              filter(Movie != "NA") %>%
+              group_by(Movie) %>%
+              summarize(Votes = n(), .groups = "drop") %>%
+              filter(Votes == max(Votes))
+          }
+            
+          return(sums)
+        },
         clean_results = function(){
         # clean early stops for when a win is determined early
             allrounds = self$calculate_rounds()

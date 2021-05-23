@@ -23,11 +23,11 @@ source("movie_select_class.R")
 fields <- c("name", "title", "newtitle", "date")
 history <- read.csv("history.csv")
 colnames(history) <- c("Movie", "Date Watched")
-movielist <- c("Back to the Future", "Close Encounters of the Third Kind",
+movielist <- c("Back to the Future", "Citizen Kane", "Close Encounters of the Third Kind",
                "Clueless", "Coming 2 America","The DaVinci Code", 
-               "Escape from New York", "Fargo", "Four Lions","Heathers",
-               "Minority Report", "My Cousin Vinny", "Pineapple Express", 
-               "Robocop", "The Social Network", "The Town", "The Big Sick",
+               "Escape from New York", "Fargo","Heathers", "Hunt for the Wilderpeople",
+               "Minority Report", "My Cousin Vinny", "Network", "Pineapple Express", 
+               "Robocop", "Snowpiercer", "The Social Network", "The Town", "The Big Sick",
                "The Martian")
 
 df = pullResponses(ssh_sesh)
@@ -38,7 +38,7 @@ ui <- fluidPage(
     # Title/head
     titlePanel("/home/common Data Science Movie Series"),
     # Update the schedule of movies after each
-    h3("Next Movie: May 22, 2021 - 7 pm Central Time"),
+    h3("Next Movie: TBD June 2021 - 7 pm Central Time"),
     h4("Check #movie-night to get more info."),
 
     sidebarLayout(
@@ -201,6 +201,8 @@ server <- function(input, output, session) {
         str4 <- kable(mv$clean_results()$fourthrd$votes, "html")
         str4b <- paste(unique(mv$clean_results()$fourthrd$losers$Movie), sep = " and ", collapse = " and ")
         str5 <- kable(mv$result_completion()[1], "html")
+        
+        str6 <- kable(mv$r4_tiebreak(), "html")
       
         # Display all the rounds, and the way the calculations went
         HTML(paste("<h2>Tutorial</h2>",
@@ -223,7 +225,9 @@ server <- function(input, output, session) {
              paste("Dropped in R3:", str3b),
              "<h2>Round 4</h2>", str4, 
              paste("Dropped in R4:", str4b),
-             str5, sep = '<br/>'))
+             str5, 
+             "<hr> <BR> <h4>Adding all votes in all rounds to tie break, winner/s:</h4>",
+             str6, "<hr>", sep = '<br/>'))
       
     })
     
